@@ -6,3 +6,4 @@
 
 char *convertFromDecimalToBinary(int);
 char *convertFromBinaryToHex(int);
+void reverseString(char*);
