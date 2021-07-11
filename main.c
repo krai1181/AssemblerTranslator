@@ -4,11 +4,10 @@
 
 int main() {
     char *number = convertFromDecimalToBinary(3);
-    int i;
-    for(i = 0;i<8;i++)
-    {
-        printf("%c",number[i] );
-    }
+
+    reverseString(number);
+    printf("%s",number);
+
     printf("\n");
 
     free(number);
