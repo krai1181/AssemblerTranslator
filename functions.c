@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "functions.h"
+
 
 char *convertFromDecimalToBinary(int decimalNumber) {
     char *binaryNumber = (char *) calloc(8, sizeof(char));
@@ -42,9 +44,21 @@ void reverseString(char *str) {
     }
 }
 
+
+char getInstructionType(Instruction instructions[], char* str){
+    char *act, *actionName, *firstNumber, *secondNumber, *thirdNumber;
+    int i;
+    size_t arraySize =  sizeof (instructions) / sizeof(instructions[0]);
+    for (i = 0; i < 36; i++) {
+        if (str == instructions[i].actionName)
+            return instructions[i].actionTYpe;
+    }
+
+    return '0';
+}
+
 char *convertFromBinaryToHex(int binaryNumber) {
     char *hexNumber = (char *) calloc(8, sizeof(char));
 
     return hexNumber;
-
 }
