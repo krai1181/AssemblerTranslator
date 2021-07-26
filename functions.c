@@ -26,6 +26,7 @@ char *convertFromDecimalToBinary(int decimalNumber) {
     return binaryNumber;
 }
 
+
 void reverseString(char *str) {
     if (*str == 0)
         return;
@@ -45,20 +46,33 @@ void reverseString(char *str) {
 }
 
 
-char getInstructionType(Instruction instructions[], char* str){
-    char *act, *actionName, *firstNumber, *secondNumber, *thirdNumber;
+char getActionType(Instruction *instructions, char *str) {
     int i;
-    size_t arraySize =  sizeof (instructions) / sizeof(instructions[0]);
-    for (i = 0; i < 36; i++) {
-        if (str == instructions[i].actionName)
-            return instructions[i].actionTYpe;
+    for (i = 0; i < INSTRUCTIONS_SIZE; i++) {
+        if (strcmp(str, instructions[i].actionName) == 0)
+            return instructions[i].actionType;
     }
 
     return '0';
 }
 
-char *convertFromBinaryToHex(int binaryNumber) {
-    char *hexNumber = (char *) calloc(8, sizeof(char));
-
+int convertFromBinaryToHex(char* binaryNumber) {
+    char *tempNum = binaryNumber;
+    int hexNumber = 0;
+    do {
+        int b = *tempNum == '1' ? 1 : 0;
+        hexNumber = (hexNumber<<1)|b;
+        tempNum++;
+    } while (*tempNum);
     return hexNumber;
 }
+
+
+int isLowerCase(char character) {
+    if (character >= 'a' && character <= 'z')
+        return 1;
+    return 0;
+}
+
+
+
