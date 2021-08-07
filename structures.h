@@ -1,5 +1,4 @@
 
-
 typedef struct Instructions {
     int opcode;
     int funct;
@@ -8,37 +7,32 @@ typedef struct Instructions {
 } Instruction;
 
 typedef struct {
-    int opcode;
-    int rs;
-    int rt;
-    int rd;
+    char *opcode;
+    char *rs;
+    char *rt;
+    char *rd;
     char *funct;
     char *notInUse;
 } R;
 
 
 typedef struct {
-    int opcode;
-    int rs;
-    int rt;
+    char *opcode;
+    char *rs;
+    char *rt;
     char *immed;
 } I;
 
 
 typedef struct {
-    int opcode;
-    int reg;
+    char *opcode;
+    char reg;
     char *address;
 } J;
 
-typedef struct {
-    R r;
-    I i;
-    J j;
-} Row;
 
 typedef struct {
-    char *address;
+    int address;
     char *sourceCode;
     char *machineCode;
 } FinalTable;

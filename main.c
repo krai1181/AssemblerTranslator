@@ -1,47 +1,24 @@
 #include <stdio.h>
+#include<stdlib.h>
+#include <ctype.h>
 #include <string.h>
 
 #include "functions.h"
 
 int main() {
-    /*instructions table*/
-    Instruction instructionsTable[] = {
-            {0,  1, 'R', "add"},
-            {0,  2, 'R', "sub"},
-            {0,  3, 'R', "and"},
-            {0,  4, 'R', "or"},
-            {0,  5, 'R', "nor"},
-            {1,  1, 'R', "move"},
-            {1,  2, 'R', "mvhi"},
-            {1,  3, 'R', "mvlo"},
-            {10, 0, 'I', "addi"},
-            {11, 0, 'I', "subi"},
-            {12, 0, 'I', "andi"},
-            {13, 0, 'I', "ori"},
-            {14, 0, 'I', "nori"},
-            {15, 0, 'I', "bne"},
-            {16, 0, 'I', "beq"},
-            {17, 0, 'I', "blt"},
-            {18, 0, 'I', "bgt"},
-            {19, 0, 'I', "lb"},
-            {20, 0, 'I', "sb"},
-            {21, 0, 'I', "lw"},
-            {22, 0, 'I', "sw"},
-            {23, 0, 'I', "lh"},
-            {24, 0, 'I', "sh"},
-            {30, 0, 'J', "jmp"},
-            {31, 0, 'J', "la"},
-            {32, 0, 'J', "call"},
-            {63, 0, 'J', "stop"}
-    };
+    FILE *psMainFile, *psExternalsFile, *psEntitiesFile;
+    psEntitiesFile = fopen("ps.ent", "a");
+    psExternalsFile = fopen("ps.ext", "a");
+    char *original = "K: la      val1";
 
-    /*  FILE *output;
-      output = fopen("output","w");*/
-
-    //char *original = "MAIN:       add   $3,$5,$9";
-    //char *original = "Next: move $3,$5";
+/*   char *original = "MAIN:       add   $3,$5,$9";
+     char *original = "Next: move $3,$5";
     char *original = "la      val1";
-    //char *original = "call val1";
+    char *original = "sw   $0,4,$10";
+    char *original = "LOOP: ori   $9,-5,$2";
+    char *original = "bne  %5 %24 loop";
+    char *original = "call val1";*/
+
     printf("%s\n", original);
 
     char sentence[10][SENTENCE_LENGTH];
@@ -50,11 +27,11 @@ int main() {
     for (i = 0; i <= (strlen(original)); i++) {
         if (original[i] == ' ')
             spaceCounter++;
-        if ((spaceCounter==1 && original[i] == ' ') || original[i] == '\0' || original[i] == ',') {
+        if ((spaceCounter == 1 && original[i] == ' ') || original[i] == '\0' || original[i] == ',') {
             sentence[counter][j] = '\0';
             counter++;  /*for next word*/
             j = 0;/*for next word, init index to 0*/
-        } else if (original[i] != ' ' && original[i] != '$'){
+        } else if (original[i] != ' ' && original[i] != '$') {
             sentence[counter][j] = original[i];
             j++;
             spaceCounter = 0;
@@ -62,44 +39,162 @@ int main() {
     }
 
 
-    //debug
+    /*debug*/
     for (i = 0; i < counter; i++)
         printf("%s\n", sentence[i]);
 
 
-    char  *functionName;
+    char *functionName;
+    R typeR;
+    I typeI;
+    J typeJ;
 
-    if(isLowerCase(sentence[0][0]) == 0 || sentence[0][0] == '.')
-        functionName = sentence[1];
-    else
-        functionName = sentence[0];
+    char actionType;
+    int currentIndex = 0;
+    int wordsIndex = 0;
 
-       char actionType = getActionType(instructionsTable, functionName);
-    printf("action type is %c", actionType);
-
-
-    //check numbers
-    char *number = convertFromDecimalToBinary(16);
-    reverseString(number);
-    printf("binary number %s\n", number);
-    printf("hex number %X\n", convertFromBinaryToHex("01000000"));
-
-    Row* rows[10];
-    if(actionType == 'R'){
-        if(strcmp(functionName,"move")==1 || strcmp(functionName,"mvhi")==1 || strcmp(functionName,"mvlo") == 1){
-            
+    if (isLowerCase(sentence[0][0]) != 0 || sentence[0][0] == '.') {
+        currentIndex = 1;
+        if (isLowerCase(sentence[0][1]) == 0 || sentence[0][1] == ':'){
+            while (sentence[0][wordsIndex] != ':') {
+                fprintf(psEntitiesFile, "%c", sentence[0][wordsIndex]);
+                wordsIndex++;
+            }
+            fputs("\n", psEntitiesFile);
         }
-
+    } else {
+        currentIndex = 0;
     }
 
 
+    functionName = sentence[currentIndex];
+    actionType = getActionType(instructionsTable, functionName);
+    if (actionType == 'R') {
+        typeR.notInUse = "000000";
+        typeR.opcode = getOpCode(functionName, instructionsTable);
+        char *rs = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 1], (char **) NULL, 10), 4);
+        typeR.rs = rs;
+        char *rt = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 2], (char **) NULL, 10), 4);
+        typeR.rt = rt;
+        char *rd = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 3], (char **) NULL, 10), 4);
+        typeR.rd = rd;
+        typeR.funct = getFuncCode(functionName, instructionsTable);
+        /* debug */
+        printf("action type is %c\n", actionType);
+        printf("typeR.opcode %s\n", typeR.opcode);
+        printf("typeR.rs  %s\n", typeR.rs);
+        printf("typeR.rt  %s\n", typeR.rt);
+        printf("typeR.rd  %s\n", typeR.rd);
+        printf("typeR.funct  %s\n", typeR.funct);
+        printf("typeR.notInUse %s\n", typeR.notInUse);
+    } else if (actionType == 'I') {
+        typeI.opcode = getOpCode(functionName, instructionsTable);
+        char *rs = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 1], (char **) NULL, 10), 4);
+        typeI.rs = rs;
+        if (strcmp(functionName, "beq") == 0 || strcmp(functionName, "bne") == 0 || strcmp(functionName, "blt") == 0 ||
+            strcmp(functionName, "bgt") == 0) {
+            char *rt = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 2], (char **) NULL, 10), 4);
+            typeI.rt = rt;
+        } else {
+            char *rt = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 3], (char **) NULL, 10), 4);
+            typeI.rt = rt;
+            char *immed = convertFromDecimalToBinary((int) strtol(sentence[currentIndex + 2], (char **) NULL, 10), 15);
+            typeI.immed = immed;
+        }
+
+        /* debug */
+        printf("action type is %c\n", actionType);
+        printf("typeI.opcode %s\n", typeI.opcode);
+        printf("typeI.rs  %s\n", typeI.rs);
+        printf("typeI.rt  %s\n", typeI.rt);
+        printf("typeI.immed  %s\n", typeI.immed);
+    } else{
+        typeJ.opcode = getOpCode(functionName, instructionsTable);
+        if (isLowerCase(sentence[currentIndex + 1][0]))
+            typeJ.reg = '0';
+        else
+            typeJ.reg = '1';
 
 
 
 
-/*
-    fclose(output);
-*/
+
+        /* debug */
+        printf("action type is %c\n", actionType);
+        printf("typeJ.opcode %s\n", typeJ.opcode);
+        printf("typeJ.reg  %c\n", typeJ.reg);
+    }
+
+
+    char translateLine[34];
+    memset(translateLine, 0, 34);
+
+
+    if (actionType == 'R') {
+        strcat(translateLine, typeR.opcode);
+        strcat(translateLine, typeR.rs);
+        strcat(translateLine, typeR.rt);
+        strcat(translateLine, typeR.rd);
+        strcat(translateLine, typeR.funct);
+        strcat(translateLine, typeR.notInUse);
+        strcat(translateLine, "\n");
+    } else if (actionType == 'I') {
+        strcat(translateLine, typeI.opcode);
+        strcat(translateLine, typeI.rs);
+        strcat(translateLine, typeI.rt);
+        strcat(translateLine, typeI.immed);
+        strcat(translateLine, "\n");
+    }
+
+    printf("translateLine %s", translateLine);
+
+
+    FinalTable table[100];
+    int k = 100, l, tableIndex = 0;
+    for (l = 0; l < 10; l++) {
+        table[l].address = k;
+        table[l].machineCode = translateLine;
+        table[l].sourceCode = original;
+
+    }
+
+    printf("%d %s %s", table[tableIndex].address, table[tableIndex].sourceCode, table[tableIndex].machineCode);
+
+    psMainFile = fopen("ps.ob", "w");
+    char c_num[9];
+    int m = (int) strlen(table[tableIndex].machineCode) - 1;
+
+    fprintf(psMainFile, "00%d ", table[tableIndex].address);
+
+    /* copy eight characters, starting at the end */
+    while (m >= 0) {
+        strncpy(c_num, &table[tableIndex].machineCode[m], 8);
+        int hex = convertFromBinaryToHex(c_num);
+        fprintf(psMainFile, "%x ", hex);
+        m -= 8;
+        memset(c_num, 0, 9);
+        /*tableIndex++;*/
+    }
+
+    fprintf(psMainFile, "\n");
+
+
+
+    /*  int x;
+      x = remove("ps.ob");
+      printf("%d",x);*/
+
+
+    /* FREE MEMORY*/
+    free(typeR.rs);
+    free(typeR.rt);
+    free(typeR.rd);
+    free(typeI.immed);
+    free(typeI.rs);
+    free(typeI.rt);
+    fclose(psMainFile);
+    fclose(psExternalsFile);
+    fclose(psEntitiesFile);
 
 
     return 0;

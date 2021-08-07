@@ -6,14 +6,14 @@
 #include "functions.h"
 
 
-char *convertFromDecimalToBinary(int decimalNumber) {
+char *convertFromDecimalToBinary(int decimalNumber, int cursorSize) {
     char *binaryNumber = (char *) calloc(8, sizeof(char));
 
     if (!binaryNumber)
         return NULL;
     int cursor, tempNumber;
 
-    for (cursor = 7; cursor >= 0; cursor--) {
+    for (cursor = cursorSize; cursor >= 0; cursor--) {
         tempNumber = decimalNumber >> cursor;
 
         if (tempNumber & 1) {
@@ -23,6 +23,7 @@ char *convertFromDecimalToBinary(int decimalNumber) {
         }
     }
     printf("\n");
+    reverseString(binaryNumber);
     return binaryNumber;
 }
 
@@ -46,11 +47,11 @@ void reverseString(char *str) {
 }
 
 
-char getActionType(Instruction *instructions, char *str) {
+char getActionType(Instruction *instruction, char *str) {
     int i;
     for (i = 0; i < INSTRUCTIONS_SIZE; i++) {
-        if (strcmp(str, instructions[i].actionName) == 0)
-            return instructions[i].actionType;
+        if (strcmp(str, instruction[i].actionName) == 0)
+            return instruction[i].actionType;
     }
 
     return '0';
@@ -70,9 +71,36 @@ int convertFromBinaryToHex(char* binaryNumber) {
 
 int isLowerCase(char character) {
     if (character >= 'a' && character <= 'z')
-        return 1;
-    return 0;
+        return 0;
+    return 1;
 }
 
+char *getFuncCode(char *functionName, Instruction *instruction){
+    char *result;
+    int i;
+    for (i = 0; i < INSTRUCTIONS_SIZE; i++) {
+        if (strcmp(functionName, instruction[i].actionName) == 0){
+            result = convertFromDecimalToBinary(instruction[i].funct, 4);
+            break;
+        } else {
+            result = "-1";
+        }
+    }
+    return result;
+}
+
+char *getOpCode(char *functionName, Instruction *instruction){
+    char *result;
+    int i;
+    for (i = 0; i < INSTRUCTIONS_SIZE; i++) {
+        if (strcmp(functionName, instruction[i].actionName) == 0){
+            result = convertFromDecimalToBinary(instruction[i].opcode, 5);
+            break;
+        } else {
+            result = "-1";
+        }
+    }
+    return result;
+}
 
 

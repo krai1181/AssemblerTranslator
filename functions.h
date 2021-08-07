@@ -1,13 +1,11 @@
 
-#include "structures.h"
+#include "utils.h"
 
-#define INSTRUCTIONS_SIZE  36
-#define SENTENCE_LENGTH  80
-
-
-char *convertFromDecimalToBinary(int);
+char *convertFromDecimalToBinary(int, int);
 int convertFromBinaryToHex(char* binaryNumber);
 void reverseString(char*);
 char getActionType(Instruction *instructions, char* str);
 int isLowerCase(char character);
+char *getFuncCode(char *functionName, Instruction *instructions);
+char *getOpCode(char *functionName, Instruction *instruction);
 
